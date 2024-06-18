@@ -1,5 +1,6 @@
 ﻿using DomainLayer.Models;
 using Microsoft.AspNetCore.Http;
+using PresentationLayer.Models;
 
 namespace DomainLayer.ViewModels.UserVIewmodels
 {
@@ -18,5 +19,7 @@ namespace DomainLayer.ViewModels.UserVIewmodels
         public string CreatedBy { get; set; }
 
         public Gender Gender { get; set; }
+
+        public int BranchId { get; set; }
     }
 }

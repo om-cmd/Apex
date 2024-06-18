@@ -13,7 +13,7 @@ namespace PresentationLayer.Models
         public string VideoPath { get; set; }
         public DateTime? DateArchived { get; set; } 
         public bool IsArchived { get; set; }
-        public DateTime ModifiedDate { get; set; }
+        public DateTime? ModifiedDate { get; set; }
         public DateTime CreatedAt { get; set; }
         public string CreatedBy {  get; set; }
         
@@ -23,8 +23,6 @@ namespace PresentationLayer.Models
         public ICollection<Comment> Comments { get; set; }
         public ICollection<Like> Likes { get; set; }
 
-        [ForeignKey(nameof(Tenant))]
-        public int TenantId { get; set; }
-        public Branch Tenant { get; set; }
+       
     }
 }

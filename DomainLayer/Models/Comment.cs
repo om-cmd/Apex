@@ -11,6 +11,8 @@ namespace PresentationLayer.Models
         public string Content { get; set; }
         public DateTime CreatedAt { get; set; }
 
+        public DateTime? UpdatedAt { get; set; }
+
         [ForeignKey(nameof(Post))]
         public int PostId { get; set; }
         public Post Post { get; set; }
@@ -19,8 +21,6 @@ namespace PresentationLayer.Models
         public int UserId { get; set; }
         public ApplicationUser User { get; set; }
 
-        [ForeignKey(nameof(Tenant))]
-        public int TenantId { get; set; }
-        public Branch Tenant { get; set; }
+      
     }
 }

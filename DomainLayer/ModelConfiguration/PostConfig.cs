@@ -12,7 +12,9 @@ namespace DomainLayer.ModelConfiguration
             builder.HasKey(x => x.Id);
             builder.Property(x => x.Id).ValueGeneratedOnAdd().IsRequired();
             builder.Property(x => x.Title).IsRequired().HasMaxLength(200);
-            builder.Property(x => x.Content).IsRequired();
+            builder.Property(x => x.TextContent).IsRequired();
+            builder.Property(x => x.ImagePath).IsRequired();
+            builder.Property(x => x.VideoPath).IsRequired();
             builder.Property(x => x.CreatedAt).IsRequired();
 
             builder.HasOne(x => x.User)
@@ -21,11 +23,7 @@ namespace DomainLayer.ModelConfiguration
                    .IsRequired()
                    .OnDelete(DeleteBehavior.Restrict); 
 
-            builder.HasOne(x => x.Tenant)
-                   .WithMany(b => b.Posts)
-                   .HasForeignKey(x => x.TenantId)
-                   .IsRequired()
-                   .OnDelete(DeleteBehavior.Restrict);
+          
 
             builder.HasMany(x => x.Comments)
                    .WithOne(c => c.Post)

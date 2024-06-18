@@ -14,6 +14,7 @@ using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using PresentationLayer.Controllers.MessageControllers;
 using System.Text;
 
 public class Program
@@ -26,7 +27,17 @@ public class Program
         builder.Services.AddControllersWithViews();
         builder.Services.AddDbContext<ApexDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
         builder.Services.AddHttpContextAccessor();
+
+
+        //signalR
+        builder.Services.AddSignalR();
+
+
+
+        //custom authentication
         builder.Services.AddSingleton<Authentication>();
+
+        //unit of work 
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         //services
@@ -54,7 +65,7 @@ public class Program
             options.UseCookieStorageProvider(SameSiteMode.Strict)
              .AbsoluteExpiration(minutes: 7)
             .ShowThousandsSeparators(false)
-            .WithEncryptionKey("IXSIGHT_KEY_FOR_DNT_CAPTCHA_GENERATION_123!@#")
+            .WithEncryptionKey("APEX_KEY_FOR_DNT_CAPTCHA_GENERATION_123!@#")
             .InputNames(// This is optional. Change it if you don't like the default names.
                 new DNTCaptchaComponent
                 {
@@ -95,12 +106,13 @@ public class Program
 
         app.UseHttpsRedirection();
         app.UseStaticFiles();
+
+
         //hangfire
         app.UseHangfireDashboard();
-
         app.UseHangfireServer();
 
-
+        //signalR
         app.UseRouting();
         app.UseAuthentication();
         app.UseAuthorization();
@@ -109,6 +121,8 @@ public class Program
         app.MapControllerRoute(
             name: "default",
             pattern: "{controller=User}/{action=Login}/{id?}");
+
+        app.MapHub<MessageHub>("/Message");
 
         app.Run();
     }

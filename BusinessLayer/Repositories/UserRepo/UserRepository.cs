@@ -66,7 +66,10 @@ namespace BusinessLayer.Repositories.UserRepo
                 Gender = model.Gender,
                 ConfirmEmail = model.ConfirmEmail,
                 DateOfBirth = model.DateOfBirth,
-                CreatedBy = userName
+                CreatedBy = userName,
+                TenantId = model.BranchId,
+                
+                
             };
 
             _unitOfWork.Context.Add(application);

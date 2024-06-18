@@ -19,8 +19,6 @@ namespace PresentationLayer.Models
         public int ReceiverId { get; set; }
         public ApplicationUser Receiver { get; set; }
 
-        [ForeignKey(nameof(Tenant))]
-        public int TenantId { get; set; }
-        public Branch Tenant { get; set; }
+       
     }
 }

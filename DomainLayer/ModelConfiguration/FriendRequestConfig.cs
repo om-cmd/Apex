@@ -26,11 +26,7 @@ namespace DomainLayer.ModelConfiguration
                    .OnDelete(DeleteBehavior.Restrict)
                    .IsRequired();
 
-            builder.HasOne(x => x.Tenant)
-                   .WithMany()
-                   .HasForeignKey(x => x.TenantId)
-                   .OnDelete(DeleteBehavior.Restrict)
-                   .IsRequired();
+
         }
     }
 }

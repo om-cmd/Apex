@@ -18,8 +18,5 @@ namespace PresentationLayer.Models
         public DateTime SentAt { get; set; }
         public bool IsAccepted { get; set; }
 
-        [ForeignKey(nameof(Tenant))]
-        public int TenantId { get; set; }
-        public Branch Tenant { get; set; }
     }
 }

@@ -16,8 +16,6 @@ namespace PresentationLayer.Models
         public int UserId { get; set; }
         public ApplicationUser User { get; set; }
 
-        [ForeignKey(nameof(Tenant))]
-        public int TenantId { get; set; }
-        public Branch Tenant { get; set; }
+      
     }
 }
