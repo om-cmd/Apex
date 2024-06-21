@@ -16,7 +16,7 @@ namespace PresentationLayer.Models
         public string CreatedBy { get; set; }
         [Required]
 
-        public DateTime? ModifiedDate    { get; set; }
+        public DateTime? ModifiedDate   { get; set; }
 
         public bool IsActive {  get; set; }
         public ICollection<ApplicationUser> Users { get; set; }

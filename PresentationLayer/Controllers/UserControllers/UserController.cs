@@ -1,26 +1,21 @@
-﻿using DNTCaptcha.Core;
-using DomainLayer.Interfaces.IService.IuserServices;
+﻿using DomainLayer.Interfaces.IService.IuserServices;
 using DomainLayer.ViewModels.UserVIewmodels;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.OutputCaching;
 
 namespace PresentationLayer.Controllers.UserControllers
 {
-
     public class UserController : Controller
     {
-
         private readonly IUserService _userService;
-
 
         public UserController(IUserService userService)
         {
             _userService = userService;
-
         }
 
-
         [HttpGet]
+        [OutputCache(Duration = 60)]
         public IActionResult Register()
         {
             return View();
@@ -36,7 +31,9 @@ namespace PresentationLayer.Controllers.UserControllers
             }
             return View(model);
         }
+
         [HttpGet]
+        [OutputCache(Duration = 60)]
         public IActionResult Login()
         {
             return View();
@@ -45,18 +42,37 @@ namespace PresentationLayer.Controllers.UserControllers
         [HttpPost]
         public IActionResult Login(LoginView model)
         {
-
             if (ModelState.IsValid)
             {
-                var user = _userService.LoginUserAsync(model);
-                if (user != null)
+                try
                 {
-                    return RedirectToAction(nameof(Login));
+                    var response = _userService.LoginUserAsync(model);
+                    if (response != null)
+                    {
+                        Response.Cookies.Append("AccessToken", response.TokenInfo.AcessTokens, new CookieOptions
+                        {
+                            HttpOnly = true, // Prevents JavaScript access
+                            Secure = true, // Ensures cookies are sent over HTTPS
+                            SameSite = SameSiteMode.Strict, // Prevents CSRF attacks
+                        });
+                        Response.Cookies.Append("RefreshToken", response.TokenInfo.RefreshTokens, new CookieOptions
+                        {
+                            HttpOnly = true,
+                            Secure = true,
+                            SameSite = SameSiteMode.Strict,
+                        });
+
+                        return Redirect(response.RedirectUrl);
+                    }
                 }
-                ModelState.AddModelError("", "Invalid login attempt.");
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", ex.Message);
+                }
             }
             return View(model);
         }
 
+      
     }
 }

@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.34916.146
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PresentationLayer", "PresentationLayer\PresentationLayer.csproj", "{46AF802F-30A3-4CB0-B9F6-ECC102D05EE9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PresentationLayer", "PresentationLayer\PresentationLayer.csproj", "{46AF802F-30A3-4CB0-B9F6-ECC102D05EE9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainLayer", "DomainLayer\DomainLayer.csproj", "{7CD48FCF-61E1-40FB-96B3-8C6ACBD20718}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DomainLayer", "DomainLayer\DomainLayer.csproj", "{7CD48FCF-61E1-40FB-96B3-8C6ACBD20718}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BusinessLayer", "BusinessLayer\BusinessLayer.csproj", "{63FB5DA0-FB4F-47D0-927E-160102BEC4E6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BusinessLayer", "BusinessLayer\BusinessLayer.csproj", "{63FB5DA0-FB4F-47D0-927E-160102BEC4E6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

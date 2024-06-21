@@ -7,6 +7,9 @@ namespace PresentationLayer.Models
 {
     public class ApplicationUser
     {
+        public string PasswordResetToken;
+        public DateTime? PasswordResetTokenExpiry;
+
         [Key]
         public int Id { get; set; }
         public string FullName { get; set; }

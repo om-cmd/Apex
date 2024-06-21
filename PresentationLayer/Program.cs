@@ -1,25 +1,37 @@
 using BusinessLayer.Middleware;
 using BusinessLayer.Repositories.UserRepo;
+using BusinessLayer.Services.CommentService;
+using BusinessLayer.Services.FriendRequestService;
 using BusinessLayer.Services.FriendRequestServices;
+using BusinessLayer.Services.LikeServices;
+using BusinessLayer.Services.NotificationServices;
 using BusinessLayer.Services.UserServices;
 using DNTCaptcha.Core;
 using DomainLayer.Data;
 using DomainLayer.DataAcess;
 using DomainLayer.DbSeed;
 using DomainLayer.Interfaces.IRepo.IuserRepos;
+using DomainLayer.Interfaces.IService.IEmailSender;
 using DomainLayer.Interfaces.IService.IFriendRequestServices;
 using DomainLayer.Interfaces.IService.IPostServices;
 using DomainLayer.Interfaces.IService.IuserServices;
+using DomainLayer.ViewModels.FriendRequestViewModels;
+using DomainLayer.ViewModels.PasswordResetViewModels;
 using Hangfire;
+using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using PresentationLayer.Controllers.MessageControllers;
+using PresentationLayer.Models;
 using System.Text;
+using static EmailSender;
 
 public class Program
 {
-    private static void Main(string[] args)
+    
+    public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
@@ -28,57 +40,67 @@ public class Program
         builder.Services.AddDbContext<ApexDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
         builder.Services.AddHttpContextAccessor();
 
+        //smtp
+        builder.Services.Configure<SmtpConfiguration>(builder.Configuration.GetSection("SmtpSettings"));
+        builder.Services.AddTransient<IEmailService, EmailSender>();
+        builder.Services.AddSingleton<OtpGenerator>();
 
-        //signalR
+
+
+        // SignalR
         builder.Services.AddSignalR();
 
-
-
-        //custom authentication
+        // Custom authentication
         builder.Services.AddSingleton<Authentication>();
 
-        //unit of work 
+        // Unit of work 
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-        //services
+        // Services
         builder.Services.AddScoped<IUserService, UserService>();
         builder.Services.AddScoped<IFriendRequestService, FrinedRequestService>();
         builder.Services.AddScoped<ICustomerService, CustomerService>();
         builder.Services.AddScoped<IPostService, PostService>();
 
-        //repository
+        // Repositories
         builder.Services.AddScoped<IUserRepo, UserRepository>();
         builder.Services.AddScoped<ICustomerRepo, CustomerRepo>();
 
-        //hangfire
-        builder.Services.AddHangfire(config =>
-              config.UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
+        // Hangfire
+        builder.Services.AddHangfire(configuration => configuration
+            .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+            .UseSimpleAssemblyNameTypeSerializer()
+            .UseDefaultTypeSerializer()
+            .UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection"), new SqlServerStorageOptions
+            {
+                CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
+                SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
+                QueuePollInterval = TimeSpan.Zero,
+                UseRecommendedIsolationLevel = true,
+                UsePageLocksOnDequeue = true,
+                DisableGlobalLocks = true
+            }));
 
         // Add Hangfire server
         builder.Services.AddHangfireServer();
 
-
-
-        //capthca generator
+        // CAPTCHA
         builder.Services.AddDNTCaptcha(options =>
         {
             options.UseCookieStorageProvider(SameSiteMode.Strict)
-             .AbsoluteExpiration(minutes: 7)
-            .ShowThousandsSeparators(false)
-            .WithEncryptionKey("APEX_KEY_FOR_DNT_CAPTCHA_GENERATION_123!@#")
-            .InputNames(// This is optional. Change it if you don't like the default names.
-                new DNTCaptchaComponent
-                {
-                    CaptchaHiddenInputName = "DNT_CaptchaText",
-                    CaptchaHiddenTokenName = "DNT_CaptchaToken",
-                    CaptchaInputName = "DNT_CaptchaInputText"
-                })
-            .Identifier("dnt_Captcha")// This is optional. Change it if you don't like its default name.
-            ;
+                   .AbsoluteExpiration(minutes: 7)
+                   .ShowThousandsSeparators(false)
+                   .WithEncryptionKey("APEX_KEY_FOR_DNT_CAPTCHA_GENERATION_123!@#")
+                   .InputNames(new DNTCaptchaComponent
+                   {
+                       CaptchaHiddenInputName = "DNT_CaptchaText",
+                       CaptchaHiddenTokenName = "DNT_CaptchaToken",
+                       CaptchaInputName = "DNT_CaptchaInputText"
+                   })
+                   .Identifier("dnt_Captcha");
         });
 
-
-        // Configure JWT authentication
+        // JWT Authentication
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
         {
             options.TokenValidationParameters = new TokenValidationParameters
@@ -100,29 +122,43 @@ public class Program
             app.UseExceptionHandler("/Home/Error");
             app.UseHsts();
         }
-        RecurringJob.AddOrUpdate<PostService>("CleanupArchivedPosts",
-            service => service.CleanupArchivedPosts(),
-            Cron.Daily);
+
+       
 
         app.UseHttpsRedirection();
         app.UseStaticFiles();
 
-
-        //hangfire
-        app.UseHangfireDashboard();
+        // Use Hangfire Dashboard and Server
+        app.UseHangfireDashboard();     
         app.UseHangfireServer();
 
-        //signalR
         app.UseRouting();
         app.UseAuthentication();
         app.UseAuthorization();
+
         app.DbSeed();
 
         app.MapControllerRoute(
             name: "default",
             pattern: "{controller=User}/{action=Login}/{id?}");
 
-        app.MapHub<MessageHub>("/Message");
+        // signalR used for sending message like and notifcation for real time 
+        app.MapHub<MessageHub>("/messageHub");
+        app.MapHub<LikeHub>("/likeHub");
+        app.MapHub<NotificationHub>("/notificationHub");
+        app.MapHub<SendCommentHub>("/commentHub");
+        app.MapHub<FreindRequestHub>("/freindrequestHub");
+
+        //recurring job for hangfire use 
+        using (var scope = app.Services.CreateScope())
+        {
+            var recurringJobManager = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
+            var postService = scope.ServiceProvider.GetRequiredService<IPostService>();
+
+            recurringJobManager.AddOrUpdate("CleanupArchivedPosts",
+                () => postService.CleanupArchivedPosts(),
+                Cron.Daily);
+        }
 
         app.Run();
     }

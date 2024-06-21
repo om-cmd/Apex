@@ -19,6 +19,9 @@ namespace DomainLayer.Interfaces.IRepo.IPostRepos
         public Task<List<Post>> GetAllPostsAsync();
         public Task<Post> FindByIdAsync(int id);
         public bool PostExists(int id);
+        public  Task<IActionResult> AddComment(int postId, string content, int userId);
+        public Task<IActionResult> AddLike(int postId, int userId);
+
 
     }
 }

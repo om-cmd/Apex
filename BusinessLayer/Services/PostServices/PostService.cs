@@ -6,10 +6,12 @@ using Microsoft.Extensions.DependencyInjection;
 public class PostService : IPostService
 {
     private readonly IServiceProvider _serviceProvider;
+    private readonly IBackgroundJobClient _jobClient;
 
-    public PostService(IServiceProvider serviceProvider)
+    public PostService(IServiceProvider serviceProvider, IBackgroundJobClient jobClient)
     {
         _serviceProvider = serviceProvider;
+        _jobClient = jobClient;
     }
 
     [AutomaticRetry(Attempts = 0)]
@@ -39,7 +41,7 @@ public class PostService : IPostService
                 context.Posts.Update(post);
                 await context.SaveChangesAsync();
 
-                BackgroundJob.Schedule(() => DeleteArchivedPost(postId), TimeSpan.FromDays(7));
+                _jobClient.Schedule(() => DeleteArchivedPost(postId), TimeSpan.FromDays(7));
             }
         }
     }

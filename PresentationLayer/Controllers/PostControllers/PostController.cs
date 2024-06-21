@@ -1,6 +1,7 @@
 ﻿using DomainLayer.Interfaces.IRepo.IPostRepos;
 using DomainLayer.ViewModels.PostViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using PresentationLayer.Models;
 
 namespace PresentationLayer.Controllers
@@ -15,6 +16,7 @@ namespace PresentationLayer.Controllers
         }
 
         [HttpGet]
+        [OutputCache(Duration = 60)]
         public IActionResult Create()
         {
             return View();
@@ -66,6 +68,8 @@ namespace PresentationLayer.Controllers
         }
 
         [HttpPost]
+        [OutputCache(Duration = 60)]
+
         public async Task<IActionResult> Archive(int id)
         {
             var post = await _postRepo.FindByIdAsync(id);
@@ -80,10 +84,26 @@ namespace PresentationLayer.Controllers
         }
 
         [HttpGet]
+        [OutputCache(Duration = 60)]
         public async Task<IActionResult> Index()
         {
             var posts = await _postRepo.GetAllPostsAsync();
             return View(posts);
+        }
+
+        [HttpPost]
+        [OutputCache(Duration =60)]
+        public async Task<IActionResult> AddComment(int postId, string content, int userId)
+        {
+            var comment = await _postRepo.AddComment(postId, content, userId);
+            return View(comment);
+        }
+        [HttpPost]
+        [OutputCache(Duration = 60)]
+        public async Task<IActionResult> AddLike(int postId, int userId)
+        {
+            var like = await _postRepo.AddLike(postId, userId);
+            return RedirectToAction(nameof(Index));
         }
     }
 }

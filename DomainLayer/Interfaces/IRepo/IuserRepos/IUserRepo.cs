@@ -8,7 +8,7 @@ namespace DomainLayer.Interfaces.IRepo.IuserRepos
     {
 
         public ApplicationUser RegisterUserAsync(RegisterView model);
-        public JWTTokenViewModels LoginUserAsync(LoginView model);
+        public LoginResponse LoginUserAsync(LoginView model);
       
 
     }

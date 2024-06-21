@@ -9,7 +9,7 @@ namespace DomainLayer.Interfaces.IService.IuserServices
     {
 
         public ApplicationUser RegisterUserAsync(RegisterView model);
-        public JWTTokenViewModels LoginUserAsync(LoginView model);
+        public LoginResponse LoginUserAsync(LoginView model);
      
 
     }

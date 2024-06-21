@@ -43,19 +43,17 @@ namespace PresentationLayer.Controllers.FriendRequestControllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AcceptFriendRequest(int requestId)
+        public async Task<IActionResult> AcceptFriendRequest(int requestId, int userId)
         {
             await _friendRequestService.AcceptFriendRequestAsync(requestId);
-            return RedirectToAction("Details");
+            return RedirectToAction("Details", new { userId });
         }
 
         [HttpPost]
-        public async Task<IActionResult> RejectFriendRequest(int requestId)
+        public async Task<IActionResult> RejectFriendRequest(int requestId, int userId)
         {
             await _friendRequestService.RejectFriendRequestAsync(requestId);
-            return RedirectToAction("Details");
+            return RedirectToAction("Details", new { userId });
         }
     }
-
-   
 }

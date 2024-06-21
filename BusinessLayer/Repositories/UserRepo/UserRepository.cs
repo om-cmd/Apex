@@ -11,6 +11,7 @@ using System.Drawing.Imaging;
 using System.Drawing;
 using DNTCaptcha.Core;
 using Microsoft.Extensions.Options;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace BusinessLayer.Repositories.UserRepo
 {
@@ -78,7 +79,7 @@ namespace BusinessLayer.Repositories.UserRepo
             return application;
         }
 
-        public JWTTokenViewModels LoginUserAsync(LoginView model)
+        public LoginResponse LoginUserAsync(LoginView model)
         {
             if (!_validatorService.HasRequestValidCaptchaEntry())
             {
@@ -91,6 +92,7 @@ namespace BusinessLayer.Repositories.UserRepo
             if (user == null || user.Password != hashedPassword)
             {
                 throw new Exception("Incorrect password or user does not exist.");
+
             }
             var token = _middleware.ProvideBothToken(user);
             var login = new JWTTokenViewModels
@@ -98,7 +100,11 @@ namespace BusinessLayer.Repositories.UserRepo
                 AcessTokens = token.AccessToken.ToString(),
                 RefreshTokens = token.RefreshToken.ToString(),
             };
-            return login;
+            return new LoginResponse
+            {
+                TokenInfo = login,
+                RedirectUrl = "/Home/Index"
+            };
         }
 
     }

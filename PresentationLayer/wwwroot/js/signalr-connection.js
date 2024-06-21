@@ -1,35 +1,45 @@
-﻿//wwwroot/js/signalr-connection.js
+﻿<><script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.0/signalr.min.js"></script><script>
+    const notificationConnection = new signalR.HubConnectionBuilder()
+    .withUrl("/notificationHub")
+    .build();
 
-document.addEventListener("DOMContentLoaded", function () {
-    const connection = new signalR.HubConnectionBuilder()
-        .withUrl("/messageHub")
-        .build();
+    const likeConnection = new signalR.HubConnectionBuilder()
+    .withUrl("/likeHub")
+    .build();
 
-    connection.on("ReceiveMessage", (user, message) => {
-        console.log(`User ${user} says: ${message}`);
-        // Display the message in the UI
-    });
+    const commentConnection = new signalR.HubConnectionBuilder()
+    .withUrl("/commentHub")
+    .build();
 
-    connection.on("ReceiveReply", (user, message) => {
-        console.log(`Reply from ${user}: ${message}`);
-        // Display the reply in the UI
-    });
+    const messageConnection = new signalR.HubConnectionBuilder()
+    .withUrl("/messageHub")
+    .build();
 
-    connection.start().catch(err => console.error(err.toString()));
-
-    window.sendMessage = async function (user, message) {
-        try {
-            await connection.invoke("SendMessage", user, message);
-        } catch (err) {
-            console.error(err.toString());
-        }
+    async function startConnection(connection) {}
+    try {await connection.start()};
+    console.log("SignalR connected");
+    } catch (err) {console.log(err)};
+    setTimeout(() => startConnection(connection), 5000);
+    }
     }
 
-    window.replyMessage = async function (user, message, replyToUser) {
-        try {
-            await connection.invoke("ReplyMessage", user, message, replyToUser);
-        } catch (err) {
-            console.error(err.toString());
-        }
-    }
-});
+    startConnection(notificationConnection);
+    startConnection(likeConnection);
+    startConnection(commentConnection);
+    startConnection(messageConnection);
+
+    notificationConnection.on("ReceiveNotification", function (message) {alert(message)};
+    });
+
+    likeConnection.on("ReceiveLike", function (postId, userId) {alert(`User ${userId} liked post ${postId}`)};
+    });
+
+    commentConnection.on("ReceiveCommentNotification", function (message) {alert(`New comment notification: ${message}`)};
+    });
+
+    messageConnection.on("ReceiveMessage", function (user, message) {alert(`Message from ${user}: ${message}`)};
+    });
+
+    messageConnection.on("ReceiveReply", function (user, message) {alert(`Reply from ${user}: ${message}`)};
+    });
+</script></>

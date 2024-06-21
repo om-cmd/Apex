@@ -18,7 +18,7 @@ namespace BusinessLayer.Services.UserServices
 
        
 
-        public JWTTokenViewModels LoginUserAsync(LoginView model)
+        public LoginResponse LoginUserAsync(LoginView model)
         {
             return _userRepo.LoginUserAsync(model);
         }

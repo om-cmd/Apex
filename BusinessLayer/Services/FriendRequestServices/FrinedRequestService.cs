@@ -2,17 +2,22 @@
 using DomainLayer.Interfaces.IService.IFriendRequestServices;
 using DomainLayer.ViewModels.FriendRequestViewModels;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.SignalR; // Import SignalR
 using PresentationLayer.Models;
+using System.Threading.Tasks;
+using BusinessLayer.Services.NotificationServices;
 
 namespace BusinessLayer.Services.FriendRequestServices
 {
     public class FrinedRequestService : IFriendRequestService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IHubContext<NotificationHub> _hubContext; // Inject SignalR hub context
 
-        public FrinedRequestService(IUnitOfWork unitOfWork)
+        public FrinedRequestService(IUnitOfWork unitOfWork, IHubContext<NotificationHub> hubContext)
         {
             _unitOfWork = unitOfWork;
+            _hubContext = hubContext;
         }
 
         public async Task AcceptFriendRequestAsync(int requestId)
@@ -59,6 +64,9 @@ namespace BusinessLayer.Services.FriendRequestServices
             };
             _unitOfWork.Context.FriendRequests.Add(friendRequest);
             await _unitOfWork.Context.SaveChangesAsync();
+
+            // Send SignalR notification to the receiving user
+            await _hubContext.Clients.User(receiverId.ToString()).SendAsync("ReceiveFriendRequest");
         }
     }
 }

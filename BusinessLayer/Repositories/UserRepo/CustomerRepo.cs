@@ -20,7 +20,7 @@ namespace BusinessLayer.Repositories.UserRepo
             {
                 throw new Exception("User does not exist");
             }
-            existingUser.IsActive = true;
+            existingUser.IsActive = false;
             _unitOfWork.Context.SaveChanges();
             return existingUser;
         }
@@ -65,7 +65,7 @@ namespace BusinessLayer.Repositories.UserRepo
 
         public ICollection<ApplicationUser> Userlist()
         {
-            return _unitOfWork.Context.Users.ToList();
+            return _unitOfWork.Context.Users.Where(x=>x.IsActive==true).ToList();
         }
     }
 }
